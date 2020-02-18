@@ -18,17 +18,26 @@ defmodule SecretHandshake do
     integer_to_binary(code)
     |> handshake
     |> Enum.each
-    |>
   end
 
   defp integer_to_binary(number) do
      Integer.digits(number, 2) |> Enum.join |> String.to_integer
   end
 
+
   defp handshake(binary) do
     cond do
-      binary = 1 ->
-        ["wink"]
+      binary > 1000 ->
+        handshake(binary - 10000)
+      binary >= 1000 and binary < 10000 ->
+        "jump"
+      binary >= 100 and binary < 1000 ->
+        "close your eyes"
+      binary >= 10 and binary < 100 ->
+        "double blink"
+      binary >= 1 and binary < 10 ->
+        "wink"
+      true -> :ok
     end
   end
 end
