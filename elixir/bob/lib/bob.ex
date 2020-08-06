@@ -1,6 +1,6 @@
 defmodule Bob do
   def hey(unstripped_input) do
-    input = String.strip(unstripped_input)
+    input = String.trim(unstripped_input)
 
     cond do
       silence?(input) ->
@@ -29,6 +29,6 @@ defmodule Bob do
   end
 
   def silence?(input) do
-    String.strip(input) == ""
+    String.trim(input) == ""
   end
 end
