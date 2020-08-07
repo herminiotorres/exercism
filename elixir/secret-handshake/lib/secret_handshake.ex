@@ -15,29 +15,38 @@ defmodule SecretHandshake do
   """
   @spec commands(code :: integer) :: list(String.t())
   def commands(code) do
-    integer_to_binary(code)
-    |> handshake
-    |> Enum.each
+    code
+    |> to_binary
+    |> to_integer
+    |> build_secret
   end
 
-  defp integer_to_binary(number) do
-     Integer.digits(number, 2) |> Enum.join |> String.to_integer
-  end
+  defp to_binary(code, base \\ 2), do: Integer.to_string(code, base)
 
+  defp to_integer(code), do: String.to_integer(code)
 
-  defp handshake(binary) do
+  defp build_secret(code), do: build_secret(code, [], false)
+
+  defp build_secret(0, acc, true), do: acc |> Enum.reverse
+  defp build_secret(0, acc, false), do: acc
+  defp build_secret(code, acc, reverse) do
     cond do
-      binary > 1000 ->
-        handshake(binary - 10000)
-      binary >= 1000 and binary < 10000 ->
-        "jump"
-      binary >= 100 and binary < 1000 ->
-        "close your eyes"
-      binary >= 10 and binary < 100 ->
-        "double blink"
-      binary >= 1 and binary < 10 ->
-        "wink"
-      true -> :ok
+      code >= 10000 ->
+        build_secret((code - 10000), acc, true)
+
+      code >= 1000 ->
+        build_secret((code - 1000), ["jump" | acc], reverse)
+
+      code >= 100 ->
+        build_secret((code - 100), ["close your eyes" | acc], reverse)
+
+      code >= 10 ->
+        build_secret((code - 10), ["double blink" | acc], reverse)
+
+      code >= 1 ->
+        build_secret((code - 1), ["wink" | acc], reverse)
+
+      true -> build_secret(code, acc, reverse)
     end
   end
 end
