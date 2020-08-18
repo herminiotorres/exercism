@@ -15,50 +15,53 @@ defmodule PigLatin do
   """
   @spec translate(phrase :: String.t()) :: String.t()
   def translate(phrase) do
-    phrase |> String.split() |> translate([]) |> Enum.reverse() |> Enum.join(" ")
-  end
-
-  defp translate([], accumulator), do: accumulator
-  defp translate([word], accumulator), do: translate([], [switch_letter(word) | accumulator])
-
-  defp translate([word | phrase], accumulator) do
-    translate(phrase, [switch_letter(word) | accumulator])
-  end
-
-  defp switch_letter(<<"ch", rest_word::binary>>), do: switch_letter("#{rest_word}ch")
-  defp switch_letter(<<"qu", rest_word::binary>>), do: switch_letter("#{rest_word}qu")
-  defp switch_letter(<<"squ", rest_word::binary>>), do: switch_letter("#{rest_word}squ")
-  defp switch_letter(<<"th", rest_word::binary>>), do: switch_letter("#{rest_word}th")
-  defp switch_letter(<<"thr", rest_word::binary>>), do: switch_letter("#{rest_word}thr")
-  defp switch_letter(<<"sch", rest_word::binary>>), do: switch_letter("#{rest_word}sch")
-
-  defp switch_letter(<<"x", second_letter::binary-size(1), rest_word::binary>>) do
     cond do
-      !Enum.member?(["a", "e", "i", "o", "u"], second_letter) ->
-        "x#{second_letter}#{rest_word}ay"
+      bigest_than_one_word?(phrase) ->
+        phrase
+        |> String.split
+        |> Enum.map(&PigLatin.translate/1)
+        |> Enum.join(" ")
+
+      beginning_with_y_or_x_followed_by_consonant?(phrase) ->
+        phrase
+        |> String.replace_suffix("", "ay")
+
+      beginning_consonant?(phrase) ->
+        phrase
+        |> String.codepoints
+        |> flip_consonant_letters_to_end([])
+        |> List.flatten
+        |> Enum.join
+        |> String.replace_suffix("", "ay")
 
       true ->
-        switch_letter("#{second_letter}#{rest_word}x")
+        phrase
+        |> String.replace_suffix("", "ay")
     end
   end
 
-  defp switch_letter(<<"y", second_letter::binary-size(1), rest_word::binary>>) do
-    cond do
-      !Enum.member?(["a", "e", "i", "o", "u"], second_letter) ->
-        "y#{second_letter}#{rest_word}ay"
+  defp bigest_than_one_word?(phrase), do: phrase |> String.split |> Enum.count > 1
 
-      true ->
-        switch_letter("#{second_letter}#{rest_word}y")
-    end
+  defp beginning_consonant?(phrase), do: Regex.match?(~r/^[^aeiou]+/i, phrase)
+
+  defp beginning_consonant_with_qu?(character, phrase), do: character == "u" and Enum.member?(phrase, "q")
+
+  defp beginning_with_y_or_x_followed_by_consonant?(<<first_letter::binary-size(1), rest_word::binary>>) do
+    Enum.member?(["x", "y"], first_letter) and beginning_consonant?(rest_word)
   end
 
-  defp switch_letter(<<first_letter::binary-size(1), rest_word::binary>>) do
+  defp flip_consonant_letters_to_end([], flip_phrase), do: flip_phrase
+  defp flip_consonant_letters_to_end([character | rest_phrase], flip_phrase) do
     cond do
-      Enum.member?(["a", "e", "i", "o", "u"], first_letter) ->
-        "#{first_letter}#{rest_word}ay"
+      beginning_consonant_with_qu?(character, flip_phrase) ->
+        flip_consonant_letters_to_end(rest_phrase, [character | flip_phrase])
+
+      beginning_consonant?(character) ->
+        flip_consonant_letters_to_end(rest_phrase, [character | flip_phrase])
 
       true ->
-        switch_letter("#{rest_word}#{first_letter}")
+        reverse_phrase = Enum.reverse(flip_phrase)
+        flip_consonant_letters_to_end([], [character | [rest_phrase | reverse_phrase]])
     end
   end
 end
