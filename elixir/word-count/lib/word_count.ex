@@ -1,5 +1,19 @@
 defmodule WordCount do
-  @pattern ~r{[!,:&@$%^&_" "]}
+  @doc """
+    Character classe:
+    alnum - Letters and digits.
+
+    Modifiers:
+      unicode (u) - enables Unicode specific patterns like \p and
+      change modifiers like \w, \W, \s and friends to also match on Unicode.
+      It expects valid Unicode strings to be given on match.
+
+      caseless (i) - adds case insensitivity.
+
+      extended (x) - whitespace characters are ignored except when escaped and
+      allow # to delimit comments.
+  """
+  @pattern ~r/[^[:alnum:]-]/xiu
 
   @doc """
   Count the number of words in the sentence.
