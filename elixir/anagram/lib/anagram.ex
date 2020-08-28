@@ -6,24 +6,12 @@ defmodule Anagram do
   def match(base, candidates) do
     candidates
     |> reject_candidate_equal(base)
-    |> reject_candidate_greater_than(base)
-    |> reject_candidate_less_than(base)
     |> filter_candidate_with_same_characters_than(base)
   end
 
   defp reject_candidate_equal(candidates, base) do
     candidates
     |> Enum.reject(& String.downcase(&1) == String.downcase(base))
-  end
-
-  defp reject_candidate_greater_than(candidates, base) do
-    candidates
-    |> Enum.reject(& String.length(&1) > String.length(base))
-  end
-
-  defp reject_candidate_less_than(candidates, base) do
-    candidates
-    |> Enum.reject(& String.length(&1) < String.length(base))
   end
 
   defp filter_candidate_with_same_characters_than(candidates, base) do
