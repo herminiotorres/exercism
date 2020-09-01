@@ -1,37 +1,23 @@
 defmodule RobotSimulator do
   defstruct direction: nil, position: nil
 
-  @directions [:north, :east, :south, :west]
+  defguard is_direction(direction) when direction in [:north, :east, :south, :west]
+  defguard is_position(x, y) when is_integer(x) and is_integer(y)
+
   @doc """
   Create a Robot Simulator given an initial direction and position.
 
   Valid directions are: `:north`, `:east`, `:south`, `:west`
   """
   @spec create(direction :: atom, position :: {integer, integer}) :: any
-  def create(direction \\ nil, position \\ nil) do
-    try do
-      robot =
-        __struct__(
-          direction: direction,
-          position: position
-        )
-
-      cond do
-        direction == nil and position == nil ->
-          %__MODULE__{direction: :north, position: {0, 0}} |> Map.from_struct
-
-        direction == direction(robot) and position == position(robot) ->
-          robot |> Map.from_struct
-
-        true ->
-          raise "invalid position"
-      end
-
-    rescue
-      MatchError -> {:error, "invalid position"}
-      exception -> {:error, Exception.message(exception)}
-    end
+  def create() do
+    %{direction: :north, position: {0, 0}}
   end
+  def create(direction, position = {x, y}) when is_direction(direction) and is_position(x, y) do
+    %{direction: direction, position: position}
+  end
+  def create(direction, _position) when is_direction(direction), do: {:error, "invalid position"}
+  def create(_direction, _position = {x, y}) when is_position(x, y), do: {:error, "invalid direction"}
 
   @doc """
   Simulate the robot's movement given a string of instructions.
@@ -40,11 +26,7 @@ defmodule RobotSimulator do
   """
   @spec simulate(robot :: any, instructions :: String.t()) :: any
   def simulate(robot, instructions) do
-    try do
-      run(instructions, robot)
-    rescue
-      exception -> {:error, Exception.message(exception)}
-    end
+    run(instructions, robot)
   end
 
   defp run("", robot), do: robot
@@ -84,7 +66,7 @@ defmodule RobotSimulator do
   defp run("A" <> instructions, %{direction: :west, position: {x, y}} = robot) do
     run(instructions, %{robot | position: {x-1, y}})
   end
-  defp run(_, _), do: raise "invalid instruction"
+  defp run(_, _), do: {:error, "invalid instruction"}
 
   @doc """
   Return the robot's direction.
@@ -93,21 +75,14 @@ defmodule RobotSimulator do
   """
   @spec direction(robot :: any) :: atom
   def direction(%{direction: direction} = _robot) do
-    cond do
-      direction in @directions
-        -> direction
-
-      true
-        -> raise "invalid direction"
-    end
+    direction
   end
 
   @doc """
   Return the robot's position.
   """
   @spec position(robot :: any) :: {integer, integer}
-  def position(%{position: {x, y}} = _robot) when is_integer(x) and is_integer(y) do
+  def position(%{position: {x, y}} = _robot) do
     {x, y}
   end
-  def position(_robot), do: raise "invalid position"
 end
