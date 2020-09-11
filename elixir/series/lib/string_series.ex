@@ -7,11 +7,8 @@ defmodule StringSeries do
   @spec slices(s :: String.t(), size :: integer) :: list(String.t())
   def slices(_, size) when size <= 0, do: []
   def slices(s, size) do
-    slices(s, size, 0, String.length(s), []) |> Enum.reverse
-  end
+    max = String.length(s)
 
-  defp slices(s, size, min, max, acc) when size+min <= max do
-    slices(s, size, min+1, max, [String.slice(s, min, size) | acc])
+    for iterate <- 0..max, iterate+size <= max, do: String.slice(s, iterate, size)
   end
-  defp slices(_, _, _, _, acc), do: acc
 end
