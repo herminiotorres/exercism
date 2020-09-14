@@ -4,10 +4,12 @@ defmodule SumOfMultiples do
   """
   @spec to(non_neg_integer, [non_neg_integer]) :: non_neg_integer
   def to(limit, factors) do
-    for num <- 1..limit, factor <- factors, num != limit and rem(num, factor) == 0 do
-      num
-    end
-    |> Enum.uniq
+    1..limit-1
+    |> Enum.filter(&multiple?(&1, factors))
     |> Enum.sum
+  end
+
+  defp multiple?(number, factors) do
+    Enum.any?(factors, &(rem(number, &1) == 0))
   end
 end
