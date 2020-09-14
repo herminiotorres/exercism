@@ -1,4 +1,7 @@
 defmodule RunLengthEncoder do
+  @encode_re ~r/([[:alpha:][:blank:]])\1*/u
+  @decode_re ~r/(\d+)([[:alpha:][:blank:]])/u
+
   @doc """
   Generates a string where consecutive elements are represented as a data value and count.
   "AABBBCCCC" => "2A3B4C"
@@ -8,44 +11,25 @@ defmodule RunLengthEncoder do
   """
   @spec encode(String.t()) :: String.t()
   def encode(string) do
-    string
-    |> String.codepoints
-    |> encode(1, "")
+    Regex.replace(@encode_re, string, &encode_replacement/2)
   end
 
-  defp encode([], _, acc), do: acc
-  defp encode([char | rest], count, acc) do
+  defp encode_replacement(consecutive, char) do
     cond do
-      List.first(rest) == char ->
-        encode(rest, count+1, acc)
-
-      List.first(rest) != char and count > 1 ->
-        encode(rest, 1, acc <> "#{count}#{char}")
+      consecutive == char ->
+        char
 
       true ->
-        encode(rest, 1, acc <> char)
+        Integer.to_string(String.length(consecutive)) <> char
     end
   end
 
   @spec decode(String.t()) :: String.t()
   def decode(string) do
-    string
-    |> String.codepoints
-    |> decode("", "")
+    Regex.replace(@decode_re, string, &decode_replacement/3)
   end
-
-  defp decode([], _count, acc), do: acc
-  defp decode([char | rest], count, acc) do
-    cond do
-      char in ~w(1 2 3 4 5 6 7 8 9) ->
-        decode(rest, count <> char, acc)
-
-      count == "" ->
-        decode(rest, count, acc <> char)
-
-      true ->
-        count = String.to_integer(count)
-        decode(rest, "", acc <> String.duplicate(char, count))
-    end
+  
+  defp decode_replacement(_, count, char) do
+    String.duplicate(char, String.to_integer(count))
   end
 end
