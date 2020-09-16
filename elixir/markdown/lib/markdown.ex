@@ -14,9 +14,8 @@ defmodule Markdown do
   def parse(m) do
     m
     |> String.split("\n")
-    |> Enum.map(& process/1)
-    |> Enum.join()
-    |> patch()
+    |> Enum.map_join(& process/1)
+    |> unordered_tag()
   end
 
   defp process(text) do
@@ -72,7 +71,7 @@ defmodule Markdown do
     end
   end
 
-  defp patch(html) do
+  defp unordered_tag(html) do
     html
     |> String.replace("<li>", "<ul>" <> "<li>", global: false)
     |> String.replace_suffix("</li>","</li>" <> "</ul>")
