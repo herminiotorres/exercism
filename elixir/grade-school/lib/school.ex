@@ -28,6 +28,6 @@ defmodule School do
   @spec sort(map) :: [{integer, [String.t()]}]
   def sort(db) do
     db
-    |> Enum.map(fn {k, _v} -> {k, grade(db, k) |> Enum.sort()} end)
+    |> Enum.map(fn {k, _v} -> {k, Enum.sort(grade(db, k))} end)
   end
 end
