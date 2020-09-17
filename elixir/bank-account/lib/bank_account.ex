@@ -3,8 +3,6 @@ defmodule BankAccount do
   A bank account that supports access from multiple processes.
   """
 
-  use Agent
-
   @typedoc """
   An account handle.
   """
@@ -24,7 +22,7 @@ defmodule BankAccount do
   """
   @spec close_bank(account) :: none
   def close_bank(account) do
-    Agent.stop(account)
+    :ok = Agent.stop(account)
   end
 
   @doc """
@@ -33,7 +31,7 @@ defmodule BankAccount do
   @spec balance(account) :: integer
   def balance(account) do
     case Process.alive?(account) do
-      true -> Agent.get(account, fn state -> state end)
+      true -> Agent.get(account, & &1)
       _ -> {:error, :account_closed}
     end
   end
@@ -44,7 +42,7 @@ defmodule BankAccount do
   @spec update(account, integer) :: any
   def update(account, amount) do
     case Process.alive?(account) do
-      true -> Agent.update(account, fn state -> state + amount end)
+      true -> Agent.update(account, & &1 + amount)
       _ -> {:error, :account_closed}
     end
   end
