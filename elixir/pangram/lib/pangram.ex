@@ -12,44 +12,28 @@ defmodule Pangram do
 
   """
 
+  @digits Enum.map(0..9, &Integer.to_string(&1))
+
   @spec pangram?(String.t()) :: boolean
   def pangram?(sentence) do
-    (lower?(sentence) || punctuation?(sentence)) &&
-      sentence_with_x_character?(sentence) &&
-      word_with_numbers?(sentence)
+    lower_or_mixed_case_with_punctuation?(sentence) &&
+    sentence_with_x_character?(sentence) &&
+    word_with_numbers?(sentence)
   end
 
-  def punctuation?(sentence) do
-    sentence_in_list = String.split(sentence)
-
-    first_sentence =
-      sentence_in_list
-      |> List.first
-      |> String.match?(~r/^[[:upper:]]/)
-
-    last_sentence =
-      sentence_in_list
-      |> List.last
-      |> String.match?(~r/.$/)
-
-    first_sentence && last_sentence
+  defp lower_or_mixed_case_with_punctuation?(sentence) do
+    String.match?(sentence, ~r/^[[:upper:]]{1}.|[[:lower:]]$/)
   end
 
-  def lower?(sentence) do
-    String.downcase(sentence) == sentence
-  end
-
-  def sentence_with_x_character?(sentence) do
+  defp sentence_with_x_character?(sentence) do
     String.match?(sentence, ~r/x/)
   end
 
-  def word_with_numbers?(sentence) do
-    digits = 0..9 |> Enum.map(&Integer.to_string(&1))
-
+  defp word_with_numbers?(sentence) do
     sentence
     |> String.split()
     |> Enum.all?(fn word ->
-      word in digits || not String.contains?(word, digits)
+      word in @digits || not String.contains?(word, @digits)
     end)
   end
 end
