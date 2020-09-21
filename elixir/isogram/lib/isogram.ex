@@ -2,6 +2,8 @@ defmodule Isogram do
   @doc """
   Determines if a word or sentence is an isogram
   """
+  @max_repeat_character 1
+
   @spec isogram?(String.t()) :: boolean
   def isogram?(sentence) do
     sentence
@@ -9,6 +11,6 @@ defmodule Isogram do
     |> Enum.join
     |> String.codepoints
     |> Enum.frequencies
-    |> Enum.all?(fn {_k, v} -> v == 1 end)
+    |> Enum.all?(fn {_key, value} -> value == @max_repeat_character end)
   end
 end
