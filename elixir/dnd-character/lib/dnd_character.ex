@@ -11,24 +11,22 @@ defmodule DndCharacter do
 
   defstruct ~w[strength dexterity constitution intelligence wisdom charisma hitpoints]a
 
+  @dice 1..6
+  @rolling 4
+
   @spec modifier(pos_integer()) :: integer()
   def modifier(score) do
-    cond do
-      score === 3       -> -4
-      score in [4, 5]   -> -3
-      score in [6, 7]   -> -2
-      score in [8, 9]   -> -1
-      score in [10, 11] -> 0
-      score in [12, 13] -> 1
-      score in [14, 15] -> 2
-      score in [16, 17] -> 3
-      score === 18      -> 4
-    end
+    Integer.floor_div(score - 10, 2)
   end
 
   @spec ability :: pos_integer()
   def ability do
-    Enum.random(3..18)
+    Enum.take_random(@dice, @rolling)
+    |> Enum.sort
+    |> Enum.reverse
+    |> Enum.chunk_every(3)
+    |> List.first
+    |> Enum.sum
   end
 
   @spec character :: t()
@@ -42,7 +40,7 @@ defmodule DndCharacter do
         wisdom: ability(),
         charisma: ability()
       }
-      
+
     %{character | hitpoints: 10 + modifier(character.constitution)}
   end
 end
