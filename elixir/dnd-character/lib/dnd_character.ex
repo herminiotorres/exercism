@@ -21,12 +21,11 @@ defmodule DndCharacter do
 
   @spec ability :: pos_integer()
   def ability do
-    Enum.take_random(@dice, @rolling)
-    |> Enum.sort
-    |> Enum.reverse
-    |> Enum.chunk_every(3)
-    |> List.first
+    dice_result = Enum.take_random(@dice, @rolling)
+
+    dice_result
     |> Enum.sum
+    |> Kernel.-(Enum.min(dice_result))
   end
 
   @spec character :: t()
