@@ -9,18 +9,24 @@ defmodule MatchingBrackets do
     |> List.flatten
     |> Enum.reduce("", fn char, acc ->
       cond do
-        char == ")" and String.ends_with?(acc, "(") ->
-          String.slice(acc, 0, String.length(acc)-1)
+        brackets?(char, acc) ->
+          slice(acc, String.length(acc))
 
-        char == "}" and String.ends_with?(acc, "{") ->
-          String.slice(acc, 0, String.length(acc)-1)
+        braces?(char, acc) ->
+          slice(acc, String.length(acc))
 
-        char == "]" and String.ends_with?(acc, "[") ->
-          String.slice(acc, 0, String.length(acc)-1)
+        parentheses?(char, acc) ->
+          slice(acc, String.length(acc))
 
         true ->
           acc <> char
       end
     end) == ""
   end
+  
+  defp brackets?(char, acc), do: char == "]" and String.ends_with?(acc, "[")
+  defp braces?(char, acc), do: char == "}" and String.ends_with?(acc, "{")
+  defp parentheses?(char, acc), do: char == ")" and String.ends_with?(acc, "(")
+
+  defp slice(acc, length), do: String.slice(acc, 0, (length-1))
 end
