@@ -13,38 +13,8 @@ defmodule FlattenArray do
   """
 
   @spec flatten(list) :: list
-  def flatten(list) do
-    list
-    |> flatten([])
-    |> sort
-  end
-
-  defp sort(list) when is_list(list) do
-    sorted = iterate(list)
-
-    cond do
-      sorted == list -> sorted
-      true           -> sort(sorted)
-    end
-  end
-
-  defp iterate([current, next | tail]) when current > next do
-    [next | iterate([current | tail])]
-  end
-  defp iterate([current, next | tail]) do
-    [current | iterate([next | tail])]
-  end
-  defp iterate(list), do: list
-
-
-  defp flatten([], acc), do: acc
-  defp flatten([head | tail], acc) when is_list(head) do
-    flatten(head) ++ flatten(tail, acc)
-  end
-  defp flatten([head | tail], acc) when is_nil(head) do
-    flatten(tail, acc)
-  end
-  defp flatten([head | tail], acc) do
-    flatten(tail, [head | acc])
-  end
+  def flatten([]), do: []
+  def flatten([head | tail]) when is_list(head), do: flatten(head) ++ flatten(tail)
+  def flatten([head | tail]) when is_nil(head), do: flatten(tail)
+  def flatten([head | tail]), do: [head] ++ flatten(tail)
 end
