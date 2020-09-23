@@ -1,8 +1,8 @@
 defmodule Phone do
   @digits ~w/2 3 4 5 6 7 8 9/
 
-  defguard is_digits(country_code \\ "1", first_area_code, first_digit)
-           when country_code == "1" and first_area_code in @digits and first_digit in @digits
+  defguard is_digits(country_code \\ "1", area_code, phone_number)
+           when country_code == "1" and area_code in @digits and phone_number in @digits
 
   @doc """
   Remove formatting from a phone number.
@@ -29,47 +29,46 @@ defmodule Phone do
   """
   @spec number(String.t()) :: String.t()
   def number(
-        <<"+", country_code::binary-size(1), " (", first_area_code::binary-size(1),
-          area_code::binary-size(2), ") ", first_digit::binary-size(1),
-          first_digits::binary-size(2), "-", last_digits::binary-size(4)>>
+        <<"+", country_code::binary-size(1), " (", area_code::binary-size(1),
+          area_code_digs::binary-size(2), ") ", phone_number::binary-size(1),
+          first_digs::binary-size(2), "-", last_digs::binary-size(4)>>
       )
-      when is_digits(country_code, first_area_code, first_digit) do
-    first_area_code <> area_code <> first_digit <> first_digits <> last_digits
+      when is_digits(country_code, area_code, phone_number) do
+    area_code <> area_code_digs <> phone_number <> first_digs <> last_digs
   end
 
   def number(
-        <<"(", first_area_code::binary-size(1), area_code::binary-size(2), ") ",
-          first_digit::binary-size(1), first_digits::binary-size(2), "-",
-          last_digits::binary-size(4)>>
+        <<"(", area_code::binary-size(1), area_code_digs::binary-size(2), ") ",
+          phone_number::binary-size(1), first_digs::binary-size(2), "-",
+          last_digs::binary-size(4)>>
       )
-      when is_digits(first_area_code, first_digit) do
-    first_area_code <> area_code <> first_digit <> first_digits <> last_digits
+      when is_digits(area_code, phone_number) do
+    area_code <> area_code_digs <> phone_number <> first_digs <> last_digs
   end
 
   def number(
-        <<first_area_code::binary-size(1), area_code::binary-size(2), ".",
-          first_digit::binary-size(1), first_digits::binary-size(2), ".",
-          last_digits::binary-size(4)>>
+        <<area_code::binary-size(1), area_code_digs::binary-size(2), ".",
+          phone_number::binary-size(1), first_digs::binary-size(2), ".",
+          last_digs::binary-size(4)>>
       )
-      when is_digits(first_area_code, first_digit) do
-    first_area_code <> area_code <> first_digit <> first_digits <> last_digits
+      when is_digits(area_code, phone_number) do
+    area_code <> area_code_digs <> phone_number <> first_digs <> last_digs
   end
 
   def number(
-        <<country_code::binary-size(1), first_area_code::binary-size(1),
-          area_code::binary-size(2), first_digit::binary-size(1), first_digits::binary-size(2),
-          last_digits::binary-size(4)>>
+        <<country_code::binary-size(1), area_code::binary-size(1), area_code_digs::binary-size(2),
+          phone_number::binary-size(1), first_digs::binary-size(2), last_digs::binary-size(4)>>
       )
-      when is_digits(country_code, first_area_code, first_digit) do
-    first_area_code <> area_code <> first_digit <> first_digits <> last_digits
+      when is_digits(country_code, area_code, phone_number) do
+    area_code <> area_code_digs <> phone_number <> first_digs <> last_digs
   end
 
   def number(
-        <<first_area_code::binary-size(1), area_code::binary-size(2), first_digit::binary-size(1),
-          first_digits::binary-size(2), last_digits::binary-size(4)>>
+        <<area_code::binary-size(1), area_code_digs::binary-size(2), phone_number::binary-size(1),
+          first_digs::binary-size(2), last_digs::binary-size(4)>>
       )
-      when is_digits(first_area_code, first_digit) do
-    first_area_code <> area_code <> first_digit <> first_digits <> last_digits
+      when is_digits(area_code, phone_number) do
+    area_code <> area_code_digs <> phone_number <> first_digs <> last_digs
   end
 
   def number(_raw), do: "0000000000"
@@ -95,12 +94,7 @@ defmodule Phone do
   "000"
   """
   @spec area_code(String.t()) :: String.t()
-  def area_code(raw) do
-    case number(raw) do
-      "0000000000" -> "000"
-      _area_code -> "212"
-    end
-  end
+  def area_code(raw), do: String.slice(number(raw), 0, 3)
 
   @doc """
   Pretty print a phone number
@@ -130,11 +124,10 @@ defmodule Phone do
   end
 
   defp format(
-         <<first_area_code::binary-size(1), area_code::binary-size(2),
-           first_digit::binary-size(1), first_digits::binary-size(2),
-           last_digits::binary-size(4)>>
+         <<area_code::binary-size(1), area_code_digs::binary-size(2),
+           phone_number::binary-size(1), first_digs::binary-size(2), last_digs::binary-size(4)>>
        ) do
-    "(#{first_area_code}#{area_code}) #{first_digit}#{first_digits}-#{last_digits}"
+    "(#{area_code}#{area_code_digs}) #{phone_number}#{first_digs}-#{last_digs}"
   end
 
   defp format(_raw), do: "(000) 000-0000"
