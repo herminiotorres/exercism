@@ -20,11 +20,28 @@ defmodule BinarySearch do
   @spec search(tuple, integer) :: {:ok, integer} | :not_found
   def search({}, _key), do: :not_found
   def search(numbers, key) do
-    size = numbers |> Tuple.to_list() |> length
-    search(numbers, key, 0, size-1)
+    list = Tuple.to_list(numbers)
+    search(list, key, 0, length(list))
   end
 
-  defp search(numbers, key, pos, _size) when elem(numbers, pos) == key, do: {:ok, pos}
-  defp search(_numbers, _key, pos, size) when pos == size, do: :not_found
-  defp search(numbers, key, pos, size), do: search(numbers, key, pos+1, size)
+  defp search(list, key, min, max) do
+    middle = div((min + max), 2)
+    guess = Enum.at(list, middle)
+
+    cond do
+      min == max and guess != key ->
+        :not_found
+
+      guess == key ->
+        {:ok, middle}
+
+      guess > key ->
+        max = middle - 1
+        search(list, key, min, max)
+
+      true ->
+        min = middle + 1
+        search(list, key, min, max)
+    end
+  end
 end
