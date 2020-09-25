@@ -9,13 +9,8 @@ defmodule Binary do
     to_decimal(string, 0)
   end
 
-  defp to_decimal("0" <> tail, acc), do: to_decimal(tail, acc)
-
-  defp to_decimal("1" <> tail, acc),
-    do: to_decimal(tail, acc + (tail |> String.length() |> pow()))
-
+  defp to_decimal("0" <> tail, acc), do: to_decimal(tail, 2 * acc)
+  defp to_decimal("1" <> tail, acc), do: to_decimal(tail, 2 * acc + 1)
   defp to_decimal("", acc), do: acc
   defp to_decimal(_, _), do: 0
-
-  defp pow(number), do: :math.pow(2, number) |> round()
 end
