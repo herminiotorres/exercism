@@ -1,5 +1,5 @@
 defmodule Phone do
-  @digits ~w/2 3 4 5 6 7 8 9/
+  @digits Enum.map(?2..?9, &<<&1>>)
 
   defguard is_digits(country_code \\ "1", area_code, phone_number)
            when country_code == "1" and area_code in @digits and phone_number in @digits
