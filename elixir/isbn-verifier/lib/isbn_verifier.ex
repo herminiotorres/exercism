@@ -1,5 +1,5 @@
 defmodule IsbnVerifier do
-  @digits ~w/0 1 2 3 4 5 6 7 8 9/
+  @digits Enum.map(?0..?9, &<<&1>>)
   @doc """
     Checks if a string is a valid ISBN-10 identifier
 
@@ -14,17 +14,26 @@ defmodule IsbnVerifier do
   """
   @spec isbn?(String.t()) :: boolean
   def isbn?(isbn) do
-    isbn
-    |> String.replace("-", "")
-    |> calc(10, 0)
-    |> Kernel.rem(11)
-    |> Kernel.==(0)
+    parsed_isbn = parser(isbn)
+
+    cond do
+      String.length(parsed_isbn) != 10 ->
+        false
+
+      true ->
+        parsed_isbn
+        |> calc(10, 0)
+        |> Kernel.rem(11)
+        |> Kernel.==(0)
+    end
   end
 
-  def calc("", _factor, sum), do: sum
-  def calc("X", factor, sum), do: calc("", factor, 10 + sum)
-  def calc(<<dig::binary-size(1), digs::binary>>, factor, sum) when dig in @digits do
+  defp parser(isbn), do: String.replace(isbn, "-", "")
+
+  defp calc("", _factor, sum), do: sum
+  defp calc("X", factor, sum), do: calc("", factor, 10 + sum)
+  defp calc(<<dig::binary-size(1), digs::binary>>, factor, sum) when dig in @digits do
     calc(digs, factor-1, String.to_integer(dig) * factor + sum)
   end
-  def calc(<<_dig::binary-size(1), digs::binary>>, factor, sum), do: calc(digs, factor-1, sum)
+  defp calc(<<_dig::binary-size(1), digs::binary>>, factor, sum), do: calc(digs, factor-1, sum)
 end
