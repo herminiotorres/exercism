@@ -17,8 +17,7 @@ defmodule IsbnVerifier do
     parsed_isbn = parser(isbn)
 
     cond do
-      String.length(parsed_isbn) != 10 ->
-        false
+      String.length(parsed_isbn) != 10 -> false
 
       true ->
         parsed_isbn
@@ -28,12 +27,12 @@ defmodule IsbnVerifier do
     end
   end
 
-  defp parser(isbn), do: String.replace(isbn, "-", "")
+  defp parser(isbn), do: String.replace(isbn, ~r/[[:punct:]]/, "")
 
   defp calc("", _factor, sum), do: sum
-  defp calc("X", factor, sum), do: calc("", factor, 10 + sum)
-  defp calc(<<dig::binary-size(1), digs::binary>>, factor, sum) when dig in @digits do
+  defp calc("X", factor, sum) when factor == 1, do: calc("", factor, 10 + sum)
+  defp calc(<<dig::binary-size(1), digs::binary>>, factor, sum) when dig in @digits and factor in 1..10 do
     calc(digs, factor-1, String.to_integer(dig) * factor + sum)
   end
-  defp calc(<<_dig::binary-size(1), digs::binary>>, factor, sum), do: calc(digs, factor-1, sum)
+  defp calc(_digs, _factor, _sum), do: calc("", 0, -1)
 end
